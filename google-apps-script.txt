@@ -1,0 +1,61 @@
+// Google Apps Script for Lead Capture
+// Use this in BOTH Google Sheets (Contact Form & Chatbot)
+
+function doPost(e) {
+  try {
+    // Get the active spreadsheet
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // Parse the POST data
+    const data = JSON.parse(e.postData.contents);
+    
+    // Prepare  row data
+    const rowData = [
+      data.timestamp || new Date().toISOString(),
+      data.name || '',
+      data.email || '',
+      data.phone || '',
+      data.service || data.initial_question || '',
+      data.company || data.chat_history || '',
+      data.message || ''
+    ];
+    
+    // Append the row
+    sheet.appendRow(rowData);
+    
+    // Return success response
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      message: 'Data saved successfully'
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    // Return error response
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// Test function (optional)
+function testScript() {
+  const testData = {
+    timestamp: new Date().toISOString(),
+    name: 'Test User',
+    email: 'test@example.com',
+    phone: '1234567890',
+    service: 'AI Automation',
+    company: 'Test Company',
+    message: 'This is a test message'
+  };
+  
+  const mockEvent = {
+    postData: {
+      contents: JSON.stringify(testData)
+    }
+  };
+  
+  doPost(mockEvent);
+  Logger.log('Test completed');
+}
